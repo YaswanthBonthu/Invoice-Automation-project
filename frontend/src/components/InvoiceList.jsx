@@ -100,7 +100,7 @@ const InvoiceList = () => {
 								<td className="px-6 py-3 text-center">{invoice.full_name}</td>
 								<td className="px-6 py-3 text-center">{invoice.status}</td>
 								<td className="px-6 py-3 flex justify-center gap-2">
-									{invoice.status === 'due' ?
+									{invoice.status !== 'completed' ?
 										<>
 											<button
 												className="px-4 py-2 bg-blue-500 text-white rounded"
