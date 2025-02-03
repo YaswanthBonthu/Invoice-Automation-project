@@ -51,7 +51,7 @@ const InvoiceList = () => {
 	}
 
 	return (
-		<div className="overflow-x-auto mt-10">
+		<div className="px-16 py-10">
 			<div className="flex justify-between items-center mb-4">
 				<h2 className="text-xl font-bold">Invoices</h2>
 				<button
