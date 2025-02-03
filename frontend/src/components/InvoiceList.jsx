@@ -1,18 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LoadingSpinner from './LoadingSpinner';
+import EditInvoicePopup from './EditInvoicePopup';
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
 const InvoiceList = () => {
 	const [invoices, setInvoices] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+	const handleEdit = (invoice) => {
+		setSelectedInvoice(invoice);
+	};
+
+	const handleUpdate = (updatedInvoice) => {
+		setInvoices((prev) =>
+			prev.map((inv) => (inv.id === updatedInvoice.id ? updatedInvoice : inv))
+		);
+	};
 
 	useEffect(() => {
 		const fetchInvoices = async () => {
 			try {
 				const response = await axios.get(`${backendURL}/invoices/due`);
 				setInvoices(response.data);
+				console.log(response.data);
+				
 			} catch (error) {
 				console.error('Error fetching invoices:', error);
 			} finally {
@@ -21,30 +35,6 @@ const InvoiceList = () => {
 		};
 		fetchInvoices();
 	}, []);
-	// useEffect(() => {
-	// 	const fetchInvoices = async () => {
-	// 		const dummyInvoices = [
-	// 			{
-	// 				id: "1",
-	// 				amount: 500,
-	// 				dueDate: "2025-02-15T00:00:00Z",
-	// 				recipient: "John Doe",
-	// 				status: "due"
-	// 			},
-	// 			{
-	// 				id: "2",
-	// 				amount: 300,
-	// 				dueDate: "2025-03-10T00:00:00Z",
-	// 				recipient: "Jane Smith",
-	// 				status: "due"
-	// 			},
-	// 		];
-	// 		setInvoices(dummyInvoices);
-	// 		setLoading(false);
-	// 	};
-
-	// 	fetchInvoices();
-	// }, []);
 
 	const handleTriggerAutomation = async (invoiceId) => {
 		try {
@@ -66,37 +56,72 @@ const InvoiceList = () => {
 		<div className="overflow-x-auto mt-10">
 			<table className="min-w-full table-auto">
 				<thead>
-					<tr className="bg-gray-200">
-						<th className="px-6 py-3 text-left text-gray-600">S.No</th>
-						<th className="px-6 py-3 text-left text-gray-600">Invoice Amount</th>
-						<th className="px-6 py-3 text-left text-gray-600">Due Date</th>
-						<th className="px-6 py-3 text-left text-gray-600">Recipient</th>
-						<th className="px-6 py-3 text-left text-gray-600">Status</th>
-						<th className="px-6 py-3 text-left text-gray-600">Action</th>
+					<tr className="bg-black text-white">
+						<th className="px-6 py-3">S.No</th>
+						<th className="px-6 py-3">Invoice Amount</th>
+						<th className="px-6 py-3">Due Date</th>
+						<th className="px-6 py-3">Recipient</th>
+						<th className="px-6 py-3">Status</th>
+						<th className="px-6 py-3">Action</th>
 					</tr>
 				</thead>
 				<tbody>
-					{invoices.map((invoice, index) => (
-						<tr key={invoice.id} className={`border-b ${index % 2 === 0 ? 'bg-gray-50' : ''}`}>
-							<td className="px-6 py-3">{index + 1}</td>
-							<td className="px-6 py-3">{invoice.amount}</td>
-							<td className="px-6 py-3">{new Date(invoice.dueDate).toLocaleDateString()}</td>
-							<td className="px-6 py-3">{invoice.recipient}</td>
-							<td className="px-6 py-3">{invoice.status}</td>
-							<td className="px-6 py-3">
-								{invoice.status === 'due' && (
-									<button
-										onClick={() => handleTriggerAutomation(invoice.id)}
-										className="px-4 py-2 bg-blue-500 text-white rounded"
+					{invoices.length === 0 ? (
+						<tr>
+							<td colSpan="6" className="px-6 py-20 text-center text-gray-500 bg-gray-200">
+								<span className="flex items-center justify-center gap-2 text-xl">
+									<svg
+										className="w-16 h-16 text-gray-400"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										viewBox="0 0 24 24"
+										xmlns="http://www.w3.org/2000/svg"
 									>
-										Trigger Automation
-									</button>
-								)}
+										<path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m3 5H6a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h4a2 2 0 012 2v14a2 2 0 01-2 2z"></path>
+									</svg>
+									No invoices available
+								</span>
 							</td>
 						</tr>
-					))}
+					) : (
+						invoices.map((invoice, index) => (
+							<tr key={invoice.id} className={`border-b ${index % 2 === 0 ? 'bg-gray-50' : ''}`}>
+								<td className="px-6 py-3 text-center">{index + 1}</td>
+								<td className="px-6 py-3 text-center">{invoice.amount}</td>
+								<td className="px-6 py-3 text-center">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+								<td className="px-6 py-3 text-center">{invoice.full_name}</td>
+								<td className="px-6 py-3 text-center">{invoice.status}</td>
+								<td className="px-6 py-3 text-center flex gap-2">
+									{invoice.status === 'due' && (
+										<>
+											<button
+												onClick={() => handleTriggerAutomation(invoice.id)}
+												className="px-4 py-2 bg-blue-500 text-white rounded"
+											>
+												Remind
+											</button>
+											<button
+												onClick={() => handleEdit(invoice)}
+												className="px-4 py-2 bg-green-500 text-white rounded"
+											>
+												Edit
+											</button>
+										</>
+									)}
+								</td>
+							</tr>
+						))
+					)}
 				</tbody>
 			</table>
+			{selectedInvoice && (
+				<EditInvoicePopup
+					invoice={selectedInvoice}
+					onClose={() => setSelectedInvoice(null)}
+					onUpdate={handleUpdate}
+				/>
+			)}
 		</div>
 	);
 };
