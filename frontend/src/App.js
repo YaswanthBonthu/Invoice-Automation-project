@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from "react-toastify";
 import InvoiceList from "./components/InvoiceList";
 import Navbar from "./components/Navbar";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

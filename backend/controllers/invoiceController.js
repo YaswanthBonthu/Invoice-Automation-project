@@ -1,4 +1,5 @@
 const InvoiceSchema = require("../models/Invoice.js");
+const axios = require("axios");
 
 const createInvoice = async( req, res ) => {
     try {
@@ -57,6 +58,29 @@ const getAllInvoices = async( req, res ) => {
     } catch (error) {
         console.log("Error in the createInvoice, ", error);
         res.status(500).send({error: "Internal server error..."});
+    }
+}
+
+const sendMail = async (req, res) => {
+    try {
+        const {fullName, email, amount, dueDate} = req.body;
+        const requiredFields = {email, fullName, dueDate, amount};
+        const missingFields = [];
+        Object.keys(requiredFields).forEach((key) => {
+            if(requiredFields[key] === undefined)
+            {
+                missingFields.push(key);
+            }
+        });
+        if(missingFields.length > 0)
+        {
+            return res.status(400).send({error: `${missingFields} are missings...You could be able to send the remainder.`});
+        }
+        // axios call for webhook 
+        res.status(200).send({message: `Mail is sent to ${email}`});
+    } catch (error) {
+        console.log("Error in the senMail, ", error);
+        res.status(200).send({error: "Internal server error"});
     }
 }
 
