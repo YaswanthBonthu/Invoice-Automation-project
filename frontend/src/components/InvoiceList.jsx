@@ -3,8 +3,11 @@ import axios from 'axios';
 import LoadingSpinner from './LoadingSpinner';
 import EditInvoicePopup from './EditInvoicePopup';
 import AddInvoicePopup from './AddInvoicePopup';
+import { toast } from "react-toastify";
+
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
+const token = localStorage.getItem("token");
 
 const InvoiceList = () => {
 	const [invoices, setInvoices] = useState([]);
@@ -18,7 +21,7 @@ const InvoiceList = () => {
 
 	const fetchInvoices = async () => {
 		try {
-			const token = localStorage.getItem("token");
+			
 			const response = await axios.get(`${backendURL}/invoices`,
 				{ headers: { Authorization: `Bearer ${token}` } });
 			setInvoices(response.data.invoices);
@@ -46,12 +49,25 @@ const InvoiceList = () => {
 	// 	}
 	// };
 
+	const sendRemainder = async( invoiceId, fullName, email, amount, dueDate ) => {
+		try {
+			const res = await axios.post(`${backendURL}/invoices/mail`,
+				{invoiceId, fullName, email, amount, dueDate},
+				{ headers: { Authorization: `Bearer ${token}` } });
+			console.log("response", res.data);
+			toast.success(res?.data?.message);
+		} catch (error) {
+			console.log(error);
+			toast.error(error?.response?.data?.error);
+		}
+	}
+
 	if (loading) {
 		return <LoadingSpinner />;
 	}
 
 	return (
-		<div className="overflow-x-auto mt-10">
+		<div className="px-16 py-10">
 			<div className="flex justify-between items-center mb-4">
 				<h2 className="text-xl font-bold">Invoices</h2>
 				<button
@@ -104,6 +120,7 @@ const InvoiceList = () => {
 										<>
 											<button
 												className="px-4 py-2 bg-blue-500 text-white rounded"
+												onClick={() => {sendRemainder(invoice._id, invoice.full_name, invoice.email, invoice.amount, invoice.dueDate)}}
 											>
 												Remind
 											</button>

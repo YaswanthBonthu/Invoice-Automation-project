@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from "react-toastify";
 import InvoiceList from "./components/InvoiceList";
 import Navbar from "./components/Navbar";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,21 +28,19 @@ const App = () => {
 
   return (
     <Router>
-      <ToastContainer position="top-center" autoClose={3000}/>
+      <ToastContainer position="top-center" autoClose={3000} />
       <Navbar />
-      <div className="container mx-auto p-4">
-        <Routes>
-          <Route path="/invoices" element={isLoggedIn ? <InvoiceList /> : <div>Please log in to view invoices</div>} />
-          <Route
-            path="/"
-            element={
-              <div className="flex justify-center items-center min-h-screen">
-                Please Login to Access your Invoices
-              </div>
-            }
-          />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/invoices" element={isLoggedIn ? <InvoiceList /> : <div>Please log in to view invoices</div>} />
+        <Route
+          path="/"
+          element={
+            <div className="flex justify-center items-center min-h-screen">
+              Please Login to Access your Invoices
+            </div>
+          }
+        />
+      </Routes>
     </Router>
   );
 };

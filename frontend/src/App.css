@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+	padding: 0;
+	margin: 0;
+}
+
+* {
+	box-sizing: border-box;
+}
 /* Add this to your CSS file */
 .loader {
 	border-top-color: transparent;
