@@ -63,8 +63,8 @@ const getAllInvoices = async( req, res ) => {
 
 const sendMail = async (req, res) => {
     try {
-        const {fullName, email, amount, dueDate} = req.body;
-        const requiredFields = {email, fullName, dueDate, amount};
+        const {invoiceId, fullName, email, amount, dueDate} = req.body;
+        const requiredFields = {email, fullName, dueDate, amount, invoiceId};
         const missingFields = [];
         Object.keys(requiredFields).forEach((key) => {
             if(requiredFields[key] === undefined)
@@ -84,4 +84,4 @@ const sendMail = async (req, res) => {
     }
 }
 
-module.exports = { createInvoice, updateInvoice, getAllInvoices };
+module.exports = { createInvoice, updateInvoice, getAllInvoices, sendMail };
