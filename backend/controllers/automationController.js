@@ -4,6 +4,6 @@ schedule.scheduleJob('26 19 * * *', async () => {
     try {
         
     } catch (error) {
-        console.log("Error in the ")
+        console.log("Error in the Automation", error);
     }
-}
+});
