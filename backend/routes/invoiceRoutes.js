@@ -1,11 +1,12 @@
 const express = require("express");
+const authMiddleware = require("../middleware/authMiddleware.js");
 const Invoice = require("../models/Invoice");
+const { createInvoice, updateInvoice, getAllInvoices } = require("../controllers/invoiceController.js");
 
 const router = express.Router();
 
-router.get("/due", async (req, res) => {
-  const invoices = await Invoice.find({ status: "due" });
-  res.json(invoices);
-});
+router.post("/", authMiddleware, createInvoice);
+router.put("/:id", authMiddleware, updateInvoice);
+router.get("/", authMiddleware, getAllInvoices);
 
 module.exports = router;
