@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LoadingSpinner from './LoadingSpinner';
 import EditInvoicePopup from './EditInvoicePopup';
+import AddInvoicePopup from './AddInvoicePopup';
 
 const backendURL = process.env.REACT_APP_BACKEND_URL;
 
@@ -9,51 +10,57 @@ const InvoiceList = () => {
 	const [invoices, setInvoices] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [selectedInvoice, setSelectedInvoice] = useState(null);
+	const [isAdding, setIsAdding] = useState(false);
 
 	const handleEdit = (invoice) => {
 		setSelectedInvoice(invoice);
 	};
 
-	const handleUpdate = (updatedInvoice) => {
-		setInvoices((prev) =>
-			prev.map((inv) => (inv.id === updatedInvoice.id ? updatedInvoice : inv))
-		);
+	const fetchInvoices = async () => {
+		try {
+			const token = localStorage.getItem("token");
+			const response = await axios.get(`${backendURL}/invoices`,
+				{ headers: { Authorization: `Bearer ${token}` } });
+			setInvoices(response.data.invoices);
+
+		} catch (error) {
+			console.error('Error fetching invoices:', error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	useEffect(() => {
-		const fetchInvoices = async () => {
-			try {
-				const response = await axios.get(`${backendURL}/invoices/due`);
-				setInvoices(response.data);
-				console.log(response.data);
-				
-			} catch (error) {
-				console.error('Error fetching invoices:', error);
-			} finally {
-				setLoading(false);
-			}
-		};
 		fetchInvoices();
 	}, []);
 
-	const handleTriggerAutomation = async (invoiceId) => {
-		try {
-			const response = await axios.post(`${backendURL}/automation/trigger`, {
-				invoiceId,
-			});
-			console.log('Automation triggered for invoice ID:', invoiceId);
-			console.log('Response:', response.data);
-		} catch (error) {
-			console.error('Error triggering automation:', error);
-		}
-	};
+	// const handleTriggerAutomation = async (invoiceId) => {
+	// 	try {
+	// 		const response = await axios.post(`${backendURL}/automation/trigger`, {
+	// 			invoiceId,
+	// 		});
+	// 		console.log('Automation triggered for invoice ID:', invoiceId);
+	// 		console.log('Response:', response.data);
+	// 	} catch (error) {
+	// 		console.error('Error triggering automation:', error);
+	// 	}
+	// };
 
 	if (loading) {
 		return <LoadingSpinner />;
 	}
 
 	return (
-		<div className="overflow-x-auto mt-10">
+		<div className="px-16 py-10">
+			<div className="flex justify-between items-center mb-4">
+				<h2 className="text-xl font-bold">Invoices</h2>
+				<button
+					onClick={() => setIsAdding(true)}
+					className="px-4 py-2 bg-green-500 text-white rounded"
+				>
+					+ Add Invoice
+				</button>
+			</div>
 			<table className="min-w-full table-auto">
 				<thead>
 					<tr className="bg-black text-white">
@@ -92,11 +99,10 @@ const InvoiceList = () => {
 								<td className="px-6 py-3 text-center">{new Date(invoice.dueDate).toLocaleDateString()}</td>
 								<td className="px-6 py-3 text-center">{invoice.full_name}</td>
 								<td className="px-6 py-3 text-center">{invoice.status}</td>
-								<td className="px-6 py-3 text-center flex gap-2">
-									{invoice.status === 'due' && (
+								<td className="px-6 py-3 flex justify-center gap-2">
+									{invoice.status !== 'completed' ?
 										<>
 											<button
-												onClick={() => handleTriggerAutomation(invoice.id)}
 												className="px-4 py-2 bg-blue-500 text-white rounded"
 											>
 												Remind
@@ -108,7 +114,14 @@ const InvoiceList = () => {
 												Edit
 											</button>
 										</>
-									)}
+										: <>
+											<button
+												className="px-4 py-2 bg-blue-500 text-white rounded"
+											>
+												Download
+											</button>
+										</>
+									}
 								</td>
 							</tr>
 						))
@@ -119,7 +132,13 @@ const InvoiceList = () => {
 				<EditInvoicePopup
 					invoice={selectedInvoice}
 					onClose={() => setSelectedInvoice(null)}
-					onUpdate={handleUpdate}
+					onFetch={() => fetchInvoices()}
+				/>
+			)}
+			{isAdding && (
+				<AddInvoicePopup
+					onClose={() => setIsAdding(false)}
+					onFetch={() => fetchInvoices()}
 				/>
 			)}
 		</div>

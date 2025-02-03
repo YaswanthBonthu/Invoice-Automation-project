@@ -28,9 +28,9 @@ const createInvoice = async( req, res ) => {
 
 const updateInvoice = async( req, res ) => {
     try {
-        const {status, amount} = req.body;
+        const {full_name, status, amount, dueDate} = req.body;
         const id = req.params.id;
-        const fieldsToUpdate = {status, amount}
+        const fieldsToUpdate = {full_name, status, amount, dueDate}
         Object.keys(fieldsToUpdate).forEach((key) => {
             if(fieldsToUpdate[key] === undefined)
             {
